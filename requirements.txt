@@ -37,11 +37,21 @@
 
 # python-dateutil==2.9.0.post0
 # PyYAML==6.0.3
-# ── Web Framework ─────────────────────────
+
+
+
+
+
+
+
+
+
+
+
 
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.2.1+cpu
-torchvision==0.17.1+cpu
+torch>=2.2.1+cpu
+torchvision>=0.17.1+cpu
 
 Flask
 python-dotenv
@@ -56,6 +66,7 @@ google-generativeai
 pinecone-client
 sentence-transformers
 transformers
+accelerate
 pypdf
 numpy
 scipy
