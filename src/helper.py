@@ -79,14 +79,12 @@
 #     return HuggingFaceEmbeddings(
 #         model_name="sentence-transformers/all-MiniLM-L6-v2"
 #     )
-
-
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import os
 
 def download_hugging_face_embeddings():
-    """Switched from Hugging Face to Google Cloud Embeddings to prevent Render OOM crashes."""
+    """Fixed model string name to prevent 404 API error."""
     return GoogleGenerativeAIEmbeddings(
-        model="models/text-embedding-004",
+        model="text-embedding-004",  # <-- Removed 'models/' prefix
         google_api_key=os.getenv("GEMINI_API_KEY")
     )
