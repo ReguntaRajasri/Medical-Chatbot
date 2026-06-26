@@ -1,26 +1,64 @@
+# Flask==3.1.3
+# gunicorn==26.0.0
 
-# langchain==0.3.26
-# flask==3.1.1
-# sentence-transformers==4.1.0
-# pypdf==5.6.1
-# python-dotenv==1.1.0
-# langchain-pinecone==0.2.8
-# langchain-openai==0.3.24
-# langchain-community==0.3.26
-# -e .
+# python-dotenv==1.2.2
+# requests==2.34.2
 
+# langchain==1.3.11
+# langchain-community==0.4.2
+# langchain-core==1.4.8
+# langchain-google-genai==4.2.5
+# langchain-pinecone==0.2.13
+# langchain-openai==1.3.3
+# langchain-huggingface==1.2.2
 
+# google-genai==2.10.0
+# openai==2.44.0
 
+# pinecone==7.3.0
+# pinecone-plugin-assistant==1.8.0
+# pinecone-plugin-interface==0.0.7
+
+# pypdf==6.14.2
+
+# numpy==2.5.0
+# scipy==1.18.0
+# scikit-learn==1.9.0
+# torch==2.12.1
+# transformers==5.12.1
+# sentence-transformers==5.6.0
+
+# SQLAlchemy==2.0.51
+# aiohttp==3.14.1
+# httpx==0.28.1
+
+# tiktoken==0.13.0
+# tokenizers==0.22.2
+
+# python-dateutil==2.9.0.post0
+# PyYAML==6.0.3
+# ── Web Framework ─────────────────────────
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.1+cpu
+torchvision==0.17.1+cpu
+
+Flask
+python-dotenv
+gunicorn
 langchain
+langchain-core
 langchain-community
 langchain-google-genai
-
-flask==3.1.1
-sentence-transformers==4.1.0
-pypdf==5.6.1
-python-dotenv==1.1.0
-
-pinecone
 langchain-pinecone
-
--e .
+langchain-huggingface
+google-generativeai
+pinecone-client
+sentence-transformers
+transformers
+pypdf
+numpy
+scipy
+requests
+httpx
+aiohttp
