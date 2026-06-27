@@ -49,27 +49,36 @@
 
 
 
---extra-index-url https://download.pytorch.org/whl/cpu
-torch>=2.2.1+cpu
-torchvision>=0.17.1+cpu
+# --extra-index-url https://download.pytorch.org/whl/cpu
+# torch>=2.2.1+cpu
+# torchvision>=0.17.1+cpu
 
-Flask
-python-dotenv
-gunicorn
-langchain
-langchain-core
-langchain-community
-langchain-google-genai
-langchain-pinecone
-langchain-huggingface
-google-generativeai
-pinecone-client
-sentence-transformers
-transformers
-accelerate
-pypdf
-numpy
-scipy
-requests
-httpx
-aiohttp
+# Flask
+# python-dotenv
+# gunicorn
+# langchain
+# langchain-core
+# langchain-community
+# langchain-google-genai
+# langchain-pinecone
+# langchain-huggingface
+# google-generativeai
+# pinecone-client
+# sentence-transformers
+# transformers
+# accelerate
+# pypdf
+# numpy
+# scipy
+# requests
+# httpx
+# aiohttp
+
+
+
+flask==3.0.3
+gunicorn==22.0.0
+python-dotenv==1.0.1
+langchain-core==0.3.35
+langchain-pinecone==0.2.0
+langchain-google-genai==2.0.0
