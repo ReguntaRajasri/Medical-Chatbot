@@ -786,8 +786,7 @@ import traceback
 import uuid
 import time
 
-# Direct import to match your 768-dimension uploaded vector store structure
-from langchain_huggingface import HuggingFaceEmbeddings
+# Direct import to match your 768-dimension uploaded vector store structur
 from src.prompt import system_prompt
 from langchain_pinecone import PineconeVectorStore
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -808,15 +807,12 @@ init_db()
 
 # ── 3. RAG KNOWLEDGE BASE SETUP ───────────────────────────────
 # Must match the exact model weights used during ingestion!
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-mpnet-base-v2"
-)
-
+# ── 3. RAG KNOWLEDGE BASE SETUP ───────────────────────────────
+# We completely bypass local embedding declarations to keep things lightweight!
 retriever = PineconeVectorStore.from_existing_index(
     index_name="medical-chatbot",
-    embedding=embeddings
+    embedding=None  
 ).as_retriever(search_type="similarity", search_kwargs={"k": 3})
-
 # ── 4. LLM CONFIGURATION ──────────────────────────────────────
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash-lite",
