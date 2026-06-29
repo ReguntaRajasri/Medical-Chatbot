@@ -114,32 +114,104 @@
 # def clear_history(session_id):
 # #     collection.delete_many({"session_id": session_id})
 
+# """
+# db.py — Chat history persistence
+# Default: SQLite (works on Render free tier — file in /tmp)
+# """
+# import sqlite3
+# import os
+# from datetime import datetime
+
+# # Detect if running on Render, otherwise use local directory safe path
+# if os.getenv("RENDER"):
+#     DB_PATH = os.getenv("SQLITE_DB_PATH", "/tmp/chat_history.db")
+# else:
+#     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+#     DB_PATH = os.path.join(BASE_DIR, "chat_history.db")
+
+# # ── INIT ──────────────────────────────────────────────────────
+# def init_db() -> None:
+#     """Create the chat_history table if it doesn't exist."""
+#     with _conn() as c:
+#         c.execute("""
+#             CREATE TABLE IF NOT EXISTS chat_history (
+#                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
+#                 session_id  TEXT    NOT NULL,
+#                 user_msg    TEXT    NOT NULL,
+#                 bot_reply   TEXT    NOT NULL,
+#                 created_at  TEXT    NOT NULL
+#             )
+#         """)
+#         c.execute("""
+#             CREATE INDEX IF NOT EXISTS idx_session
+#             ON chat_history (session_id, created_at)
+#         """)
+
+# # ── CONNECTION ────────────────────────────────────────────────
+# def _conn() -> sqlite3.Connection:
+#     conn = sqlite3.connect(DB_PATH)
+#     conn.row_factory = sqlite3.Row   # lets us access columns by name
+#     return conn
+
+# # ── WRITE ─────────────────────────────────────────────────────
+# def save_message(session_id: str, user_msg: str, bot_reply: str) -> None:
+#     """Insert one exchange into the database."""
+#     with _conn() as c:
+#         c.execute("""
+#             INSERT INTO chat_history (session_id, user_msg, bot_reply, created_at)
+#             VALUES (?, ?, ?, ?)
+#         """, (session_id, user_msg, bot_reply, datetime.utcnow().isoformat()))
+
+# # ── READ ──────────────────────────────────────────────────────
+# def get_history(session_id: str, limit: int = 5) -> list[dict]:
+#     """
+#     Return the last `limit` exchanges for this session,
+#     oldest-first so the prompt reads naturally.
+#     """
+#     with _conn() as c:
+#         rows = c.execute("""
+#             SELECT user_msg, bot_reply FROM chat_history
+#             WHERE session_id = ?
+#             ORDER BY created_at DESC LIMIT ?
+#         """, (session_id, limit)).fetchall()
+#     return [{"user": r["user_msg"], "assistant": r["bot_reply"]}
+#             for r in reversed(rows)]
+
+# # ── DELETE ────────────────────────────────────────────────────
+# def clear_history(session_id: str) -> None:
+#     """Delete all messages for a session (called by /clear route)."""
+#     with _conn() as c:
+#         c.execute("DELETE FROM chat_history WHERE session_id = ?", (session_id,))
+
+
+
+
+
+
+
+
+
+
 """
-db.py — Chat history persistence
-Default: SQLite (works on Render free tier — file in /tmp)
+db.py — SQLite chat history
+Works locally (saves next to app) and on Render (/tmp)
 """
-import sqlite3
-import os
+import sqlite3, os
 from datetime import datetime
 
-# Detect if running on Render, otherwise use local directory safe path
-if os.getenv("RENDER"):
-    DB_PATH = os.getenv("SQLITE_DB_PATH", "/tmp/chat_history.db")
-else:
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    DB_PATH = os.path.join(BASE_DIR, "chat_history.db")
+# /tmp on Render (ephemeral), local dir otherwise
+DB_PATH = "/tmp/chat_history.db" if os.getenv("RENDER") else \
+          os.path.join(os.path.dirname(os.path.abspath(__file__)), "chat_history.db")
 
-# ── INIT ──────────────────────────────────────────────────────
 def init_db() -> None:
-    """Create the chat_history table if it doesn't exist."""
     with _conn() as c:
         c.execute("""
             CREATE TABLE IF NOT EXISTS chat_history (
-                id          INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_id  TEXT    NOT NULL,
-                user_msg    TEXT    NOT NULL,
-                bot_reply   TEXT    NOT NULL,
-                created_at  TEXT    NOT NULL
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id TEXT NOT NULL,
+                user_msg   TEXT NOT NULL,
+                bot_reply  TEXT NOT NULL,
+                created_at TEXT NOT NULL
             )
         """)
         c.execute("""
@@ -147,27 +219,19 @@ def init_db() -> None:
             ON chat_history (session_id, created_at)
         """)
 
-# ── CONNECTION ────────────────────────────────────────────────
 def _conn() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row   # lets us access columns by name
+    conn.row_factory = sqlite3.Row
     return conn
 
-# ── WRITE ─────────────────────────────────────────────────────
 def save_message(session_id: str, user_msg: str, bot_reply: str) -> None:
-    """Insert one exchange into the database."""
     with _conn() as c:
         c.execute("""
             INSERT INTO chat_history (session_id, user_msg, bot_reply, created_at)
             VALUES (?, ?, ?, ?)
         """, (session_id, user_msg, bot_reply, datetime.utcnow().isoformat()))
 
-# ── READ ──────────────────────────────────────────────────────
 def get_history(session_id: str, limit: int = 5) -> list[dict]:
-    """
-    Return the last `limit` exchanges for this session,
-    oldest-first so the prompt reads naturally.
-    """
     with _conn() as c:
         rows = c.execute("""
             SELECT user_msg, bot_reply FROM chat_history
@@ -177,8 +241,6 @@ def get_history(session_id: str, limit: int = 5) -> list[dict]:
     return [{"user": r["user_msg"], "assistant": r["bot_reply"]}
             for r in reversed(rows)]
 
-# ── DELETE ────────────────────────────────────────────────────
 def clear_history(session_id: str) -> None:
-    """Delete all messages for a session (called by /clear route)."""
     with _conn() as c:
         c.execute("DELETE FROM chat_history WHERE session_id = ?", (session_id,))

@@ -227,154 +227,279 @@
 # print(response.content)
 
 
-import os
-from dotenv import load_dotenv
-# from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
-from langchain_community.document_loaders import PyPDFium2Loader, DirectoryLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
-from langchain_pinecone import PineconeVectorStore
-from pinecone import Pinecone, ServerlessSpec
-from langchain_huggingface import HuggingFaceEmbeddings
+# import os
+# from dotenv import load_dotenv
+# # from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
+# from langchain_community.document_loaders import PyPDFium2Loader, DirectoryLoader
+# from langchain_text_splitters import RecursiveCharacterTextSplitter
+# from langchain_core.documents import Document
+# from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+# from langchain_pinecone import PineconeVectorStore
+# from pinecone import Pinecone, ServerlessSpec
+# from langchain_huggingface import HuggingFaceEmbeddings  
 
-# ── 1. LOAD ENVIRONMENT VARIABLES ─────────────────────────────
-load_dotenv()
+# # ── 1. LOAD ENVIRONMENT VARIABLES ─────────────────────────────
+# load_dotenv()
 
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+# GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Set them explicitly in the environment for LangChain wrappers
-os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
-os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
+# # Set them explicitly in the environment for LangChain wrappers
+# os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
+# os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
 
-# ── 2. EXTRACT TEXT FROM PDF FILES ────────────────────────────
-# def load_pdf_files(data_directory):
+# # ── 2. EXTRACT TEXT FROM PDF FILES ────────────────────────────
+# # def load_pdf_files(data_directory):
+# #     loader = DirectoryLoader(
+# #         data_directory,
+# #         glob="*.pdf",
+# #         loader_cls=PyPDFLoader
+# #     )
+# #     documents = loader.load()
+# #     return documents
+# def load_pdf_files(data):
 #     loader = DirectoryLoader(
-#         data_directory,
+#         data,
 #         glob="*.pdf",
-#         loader_cls=PyPDFLoader
+#         loader_cls=PyPDFium2Loader  # <-- Changed to PyPDFium2Loader
 #     )
+
 #     documents = loader.load()
 #     return documents
-def load_pdf_files(data):
-    loader = DirectoryLoader(
-        data,
-        glob="*.pdf",
-        loader_cls=PyPDFium2Loader  # <-- Changed to PyPDFium2Loader
-    )
 
-    documents = loader.load()
-    return documents
+# print("Loading PDF files from directory...")
+# extracted_data = load_pdf_files("data")
 
-print("Loading PDF files from directory...")
-extracted_data = load_pdf_files("data")
+# # Clean up document metadata to keep only the source track
+# def filter_to_minimal_docs(docs):
+#     minimal_docs = []
+#     for doc in docs:
+#         src = doc.metadata.get("source")
+#         minimal_docs.append(
+#             Document(
+#                 page_content=doc.page_content,
+#                 metadata={"source": src}
+#             )
+#         )
+#     return minimal_docs
 
-# Clean up document metadata to keep only the source track
-def filter_to_minimal_docs(docs):
-    minimal_docs = []
-    for doc in docs:
-        src = doc.metadata.get("source")
-        minimal_docs.append(
-            Document(
-                page_content=doc.page_content,
-                metadata={"source": src}
-            )
-        )
-    return minimal_docs
+# minimal_docs = filter_to_minimal_docs(extracted_data)
 
-minimal_docs = filter_to_minimal_docs(extracted_data)
+# # ── 3. SPLIT TEXT INTO CHUNKS ──────────────────────────────────
+# def text_split(docs):
+#     text_splitter = RecursiveCharacterTextSplitter(
+#         chunk_size=500,
+#         chunk_overlap=20,
+#     )
+#     return text_splitter.split_documents(docs)
 
-# ── 3. SPLIT TEXT INTO CHUNKS ──────────────────────────────────
-def text_split(docs):
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=20,
-    )
-    return text_splitter.split_documents(docs)
+# texts_chunk = text_split(minimal_docs)
+# print(f"Total processed text chunks: {len(texts_chunk)}")
 
-texts_chunk = text_split(minimal_docs)
-print(f"Total processed text chunks: {len(texts_chunk)}")
+# # # ── 4. INITIALIZE GOOGLE EMBEDDINGS ───────────────────────────
+# # def download_embeddings():
+# #     """Download and return the Google GenAI embeddings model."""
+# #     embeddings = GoogleGenerativeAIEmbeddings(  # <-- Changed
+# #         model="text-embedding-004",  # Keep this as text-embedding-004
+# #         google_api_key=GEMINI_API_KEY
+# #     )
+# #     return embeddings
+
+# # embedding = download_embeddings()
+
+# # # ── 5. PINECONE CLIENT SETUP & INDEX INGESTION ────────────────
+# # index_name = "medical-chatbot"
+
+# # # Initialize Pinecone Client
+# # pc = Pinecone(api_key=PINECONE_API_KEY)
+
+# # # Safety check: Create the index if it doesn't exist yet with 768 dimensions
+# # if not pc.has_index(index_name):
+# #     print(f"Index '{index_name}' not found. Creating a new 768-dimension index...")
+# #     pc.create_index(
+# #         name=index_name,
+# #         dimension=768,  # Size needed for text-embedding-004
+# #         metric="cosine",
+# #         spec=ServerlessSpec(cloud="aws", region="us-east-1")
+# #     )
+
+# # print(f"Uploading vectors to your empty '{index_name}' index in Pinecone...")
+
+# # # Embed chunks and push them directly to Pinecone
+# # docsearch = PineconeVectorStore.from_documents(
+# #     documents=texts_chunk,
+# #     embedding=embedding,
+# #     index_name=index_name
+# # )
+
+# # print("🎉 Successfully uploaded all medical vectors to Pinecone!")
 
 # # ── 4. INITIALIZE GOOGLE EMBEDDINGS ───────────────────────────
+# # ── 4. INITIALIZE GOOGLE EMBEDDINGS ───────────────────────────
+# # ── 4. INITIALIZE GOOGLE EMBEDDINGS ───────────────────────────
+# # ── 4. INITIALIZE LOCAL HUGGINGFACE EMBEDDINGS ────────────────
+# from langchain_huggingface import HuggingFaceEmbeddings
+
 # def download_embeddings():
-#     """Download and return the Google GenAI embeddings model."""
-#     embeddings = GoogleGenerativeAIEmbeddings(  # <-- Changed
-#         model="text-embedding-004",  # Keep this as text-embedding-004
-#         google_api_key=GEMINI_API_KEY
+#     """Download and return a local 768-dimension embedding model."""
+#     print("Initializing local Hugging Face embedding model (768 dimensions)...")
+#     embeddings = HuggingFaceEmbeddings(
+#         model_name="sentence-transformers/all-mpnet-base-v2"
 #     )
 #     return embeddings
 
 # embedding = download_embeddings()
 
-# # ── 5. PINECONE CLIENT SETUP & INDEX INGESTION ────────────────
+# # ── 5. PINECONE CLIENT SETUP & BATCH INGESTION ────────────────
 # index_name = "medical-chatbot"
 
 # # Initialize Pinecone Client
 # pc = Pinecone(api_key=PINECONE_API_KEY)
 
-# # Safety check: Create the index if it doesn't exist yet with 768 dimensions
 # if not pc.has_index(index_name):
 #     print(f"Index '{index_name}' not found. Creating a new 768-dimension index...")
 #     pc.create_index(
 #         name=index_name,
-#         dimension=768,  # Size needed for text-embedding-004
+#         dimension=768,  
 #         metric="cosine",
 #         spec=ServerlessSpec(cloud="aws", region="us-east-1")
 #     )
 
-# print(f"Uploading vectors to your empty '{index_name}' index in Pinecone...")
+# print(f"Starting batch upload of {len(texts_chunk)} vectors to 'medical-chatbot'...")
 
-# # Embed chunks and push them directly to Pinecone
-# docsearch = PineconeVectorStore.from_documents(
-#     documents=texts_chunk,
-#     embedding=embedding,
-#     index_name=index_name
-# )
+# # Initialize the vector store empty linked to your index
+# docsearch = PineconeVectorStore(index_name=index_name, embedding=embedding)
 
-# print("🎉 Successfully uploaded all medical vectors to Pinecone!")
+# # Process in safe chunks of 1,000 to prevent API rate limits and timeouts
+# batch_size = 1000
+# for i in range(0, len(texts_chunk), batch_size):
+#     batch = texts_chunk[i:i + batch_size]
+#     print(f"Uploading batch {i // batch_size + 1}/{(len(texts_chunk) // batch_size) + 1} ({len(batch)} chunks)...")
+#     docsearch.add_documents(documents=batch)
 
-# ── 4. INITIALIZE GOOGLE EMBEDDINGS ───────────────────────────
-# ── 4. INITIALIZE GOOGLE EMBEDDINGS ───────────────────────────
-# ── 4. INITIALIZE GOOGLE EMBEDDINGS ───────────────────────────
-# ── 4. INITIALIZE LOCAL HUGGINGFACE EMBEDDINGS ────────────────
-from langchain_huggingface import HuggingFaceEmbeddings
+# print("🎉 Successfully uploaded all 40,257 medical vectors to Pinecone!")
+"""
+store_index.py — Uses sentence-transformers locally for indexing.
+NO API quota. NO rate limits. Runs completely offline.
+Model: all-mpnet-base-v2 → 768 dimensions
+Run once locally, then deploy app to Render.
+"""
+import os, time
+from dotenv import load_dotenv
+from pinecone import Pinecone, ServerlessSpec
+from sentence_transformers import SentenceTransformer
+import pypdf
 
-def download_embeddings():
-    """Download and return a local 768-dimension embedding model."""
-    print("Initializing local Hugging Face embedding model (768 dimensions)...")
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-mpnet-base-v2"
-    )
-    return embeddings
+load_dotenv()
 
-embedding = download_embeddings()
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+INDEX_NAME       = "medical-chatbot"
+PDF_PATH         = "data/Medical book.pdf"
+CHUNK_SIZE       = 500
+CHUNK_OVERLAP    = 50
+BATCH_SIZE       = 100   # large batch — no API limits!
+PROGRESS_FILE    = "progress.txt"
 
-# ── 5. PINECONE CLIENT SETUP & BATCH INGESTION ────────────────
-index_name = "medical-chatbot"
+# ── STEP 1: Load embedding model (downloads once, ~420MB) ─────
+print("Loading embedding model (downloads once ~420MB)...")
+model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
+print("Model loaded.")
 
-# Initialize Pinecone Client
+# ── STEP 2: Read PDF ──────────────────────────────────────────
+print(f"\nOpening: {PDF_PATH}")
+reader      = pypdf.PdfReader(PDF_PATH)
+total_pages = len(reader.pages)
+print(f"Total pages: {total_pages}")
+
+all_text = []
+for i, page in enumerate(reader.pages):
+    if i % 200 == 0:
+        print(f"  Reading page {i+1}/{total_pages}...", flush=True)
+    try:
+        text = (page.extract_text() or "").strip()
+        if text:
+            all_text.append(text)
+    except Exception:
+        pass
+
+print(f"Extracted text from {len(all_text)} pages")
+
+# ── STEP 3: Chunk ─────────────────────────────────────────────
+print("Chunking...")
+chunks = []
+for page_text in all_text:
+    words = page_text.split()
+    start = 0
+    while start < len(words):
+        chunk = " ".join(words[start : start + CHUNK_SIZE])
+        if chunk.strip():
+            chunks.append(chunk)
+        start += CHUNK_SIZE - CHUNK_OVERLAP
+
+print(f"Total chunks: {len(chunks)}")
+
+# ── STEP 4: Pinecone — dimension=768 ─────────────────────────
+print("\nConnecting to Pinecone...")
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
-if not pc.has_index(index_name):
-    print(f"Index '{index_name}' not found. Creating a new 768-dimension index...")
-    pc.create_index(
-        name=index_name,
-        dimension=768,  
-        metric="cosine",
-        spec=ServerlessSpec(cloud="aws", region="us-east-1")
-    )
+if pc.has_index(INDEX_NAME):
+    print(f"Deleting old index (wrong dimensions from yesterday)...")
+    pc.delete_index(INDEX_NAME)
+    time.sleep(8)
 
-print(f"Starting batch upload of {len(texts_chunk)} vectors to 'medical-chatbot'...")
+print("Creating index with dimension=768...")
+pc.create_index(
+    name=INDEX_NAME,
+    dimension=768,
+    metric="cosine",
+    spec=ServerlessSpec(cloud="aws", region="us-east-1")
+)
+time.sleep(10)
+index = pc.Index(INDEX_NAME)
+print("Pinecone ready.")
 
-# Initialize the vector store empty linked to your index
-docsearch = PineconeVectorStore(index_name=index_name, embedding=embedding)
+# ── STEP 5: Resume support ────────────────────────────────────
+start_batch = 0
+if os.path.exists(PROGRESS_FILE):
+    with open(PROGRESS_FILE) as f:
+        val = f.read().strip()
+        if val.isdigit():
+            start_batch = int(val)
+            print(f"Resuming from batch {start_batch + 1}")
 
-# Process in safe chunks of 1,000 to prevent API rate limits and timeouts
-batch_size = 1000
-for i in range(0, len(texts_chunk), batch_size):
-    batch = texts_chunk[i:i + batch_size]
-    print(f"Uploading batch {i // batch_size + 1}/{(len(texts_chunk) // batch_size) + 1} ({len(batch)} chunks)...")
-    docsearch.add_documents(documents=batch)
+total_batches = (len(chunks) - 1) // BATCH_SIZE + 1
+print(f"\nUploading {len(chunks)} chunks in {total_batches} batches of {BATCH_SIZE}...")
+print("(No API quota — running at full speed)\n")
 
-print("🎉 Successfully uploaded all 40,257 medical vectors to Pinecone!")
+# ── STEP 6: Embed + Upload (local, no quota) ──────────────────
+for i in range(start_batch * BATCH_SIZE, len(chunks), BATCH_SIZE):
+    batch     = chunks[i : i + BATCH_SIZE]
+    batch_num = i // BATCH_SIZE + 1
+    print(f"  Batch {batch_num}/{total_batches} ({len(batch)} chunks)...", end=" ", flush=True)
+
+    try:
+        # Local embedding — instant, no internet needed
+        vectors_values = model.encode(batch, show_progress_bar=False).tolist()
+
+        vectors = [
+            {
+                "id":       f"chunk-{i + j}",
+                "values":   vectors_values[j],
+                "metadata": {"text": batch[j], "source": PDF_PATH}
+            }
+            for j in range(len(batch))
+        ]
+        index.upsert(vectors=vectors)
+        print("done")
+
+        # Save progress
+        with open(PROGRESS_FILE, "w") as f:
+            f.write(str(batch_num))
+
+    except Exception as e:
+        print(f"FAILED: {e}")
+
+print(f"\nDone! {len(chunks)} vectors uploaded to '{INDEX_NAME}'.")
+if os.path.exists(PROGRESS_FILE):
+    os.remove(PROGRESS_FILE)
+print("You can now deploy to Render!")

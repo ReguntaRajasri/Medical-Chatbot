@@ -75,10 +75,29 @@
 # aiohttp
 
 
-
-flask==3.0.3
+# ── Web ───────────────────────────────────────────────────────
+Flask==3.0.3
 gunicorn==22.0.0
 python-dotenv==1.0.1
-langchain-core==0.3.35
-langchain-pinecone==0.2.0
-langchain-google-genai==2.0.0
+
+# ── LangChain Google (LLM only) ───────────────────────────────
+langchain-google-genai==4.0.0
+langchain-core==1.4.8
+google-genai==1.53.0
+
+# ── Embeddings (local, no quota) ──────────────────────────────
+sentence-transformers==3.3.1
+
+# ── Pinecone ──────────────────────────────────────────────────
+pinecone==6.0.0
+
+# ── PDF (store_index.py only) ─────────────────────────────────
+pypdf==4.3.1
+
+# ── HTTP ──────────────────────────────────────────────────────
+requests==2.32.3
+httpx==0.28.1
+
+# ── Utils ─────────────────────────────────────────────────────
+PyYAML==6.0.2
+python-dateutil==2.9.0.post0
