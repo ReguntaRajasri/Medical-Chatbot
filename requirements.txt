@@ -1,78 +1,31 @@
-# Flask==3.1.3
-# gunicorn==26.0.0
 
-# python-dotenv==1.2.2
-# requests==2.34.2
 
-# langchain==1.3.11
-# langchain-community==0.4.2
+# # ── Web ───────────────────────────────────────────────────────
+# Flask==3.0.3
+# gunicorn==22.0.0
+# python-dotenv==1.0.1
+
+# # ── LangChain Google (LLM only) ───────────────────────────────
+# langchain-google-genai==4.0.0
 # langchain-core==1.4.8
-# langchain-google-genai==4.2.5
-# langchain-pinecone==0.2.13
-# langchain-openai==1.3.3
-# langchain-huggingface==1.2.2
+# google-genai==1.53.0
 
-# google-genai==2.10.0
-# openai==2.44.0
+# # ── Embeddings (local, no quota) ──────────────────────────────
+# sentence-transformers==3.3.1
 
-# pinecone==7.3.0
-# pinecone-plugin-assistant==1.8.0
-# pinecone-plugin-interface==0.0.7
+# # ── Pinecone ──────────────────────────────────────────────────
+# pinecone==6.0.0
 
-# pypdf==6.14.2
+# # ── PDF (store_index.py only) ─────────────────────────────────
+# pypdf==4.3.1
 
-# numpy==2.5.0
-# scipy==1.18.0
-# scikit-learn==1.9.0
-# torch==2.12.1
-# transformers==5.12.1
-# sentence-transformers==5.6.0
-
-# SQLAlchemy==2.0.51
-# aiohttp==3.14.1
+# # ── HTTP ──────────────────────────────────────────────────────
+# requests==2.32.3
 # httpx==0.28.1
 
-# tiktoken==0.13.0
-# tokenizers==0.22.2
-
+# # ── Utils ─────────────────────────────────────────────────────
+# PyYAML==6.0.2
 # python-dateutil==2.9.0.post0
-# PyYAML==6.0.3
-
-
-
-
-
-
-
-
-
-
-
-
-# --extra-index-url https://download.pytorch.org/whl/cpu
-# torch>=2.2.1+cpu
-# torchvision>=0.17.1+cpu
-
-# Flask
-# python-dotenv
-# gunicorn
-# langchain
-# langchain-core
-# langchain-community
-# langchain-google-genai
-# langchain-pinecone
-# langchain-huggingface
-# google-generativeai
-# pinecone-client
-# sentence-transformers
-# transformers
-# accelerate
-# pypdf
-# numpy
-# scipy
-# requests
-# httpx
-# aiohttp
 
 
 # ── Web ───────────────────────────────────────────────────────
@@ -85,14 +38,15 @@ langchain-google-genai==4.0.0
 langchain-core==1.4.8
 google-genai==1.53.0
 
-# ── Embeddings (local, no quota) ──────────────────────────────
-sentence-transformers==3.3.1
-
 # ── Pinecone ──────────────────────────────────────────────────
 pinecone==6.0.0
 
-# ── PDF (store_index.py only) ─────────────────────────────────
-pypdf==4.3.1
+# ── Embeddings — CPU only, no torch, no CUDA ──────────────────
+# Forces sentence-transformers to use ONNX runtime instead of torch
+# Result: ~80MB RAM instead of 1.5GB
+onnxruntime==1.22.0
+optimum[onnxruntime]==1.26.2
+sentence-transformers==3.3.1
 
 # ── HTTP ──────────────────────────────────────────────────────
 requests==2.32.3
