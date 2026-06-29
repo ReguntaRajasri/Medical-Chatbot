@@ -28,30 +28,44 @@
 # python-dateutil==2.9.0.post0
 
 
-# ── Web ───────────────────────────────────────────────────────
+# # ── Web ───────────────────────────────────────────────────────
+# Flask==3.0.3
+# gunicorn==22.0.0
+# python-dotenv==1.0.1
+
+# # ── LangChain Google (LLM only) ───────────────────────────────
+# langchain-google-genai==4.0.0
+# langchain-core==1.4.8
+# google-genai==1.53.0
+
+# # ── Pinecone ──────────────────────────────────────────────────
+# pinecone==6.0.0
+
+# # ── Embeddings — ONNX backend, no torch, no CUDA ─────────────
+# onnxruntime==1.27.0
+# optimum[onnxruntime]==1.26.2
+# sentence-transformers==3.3.1
+
+# # ── HTTP ──────────────────────────────────────────────────────
+# requests==2.32.3
+# httpx==0.28.1
+
+# # ── Utils ─────────────────────────────────────────────────────
+# PyYAML==6.0.2
+# python-dateutil==2.9.0.post0
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 Flask==3.0.3
 gunicorn==22.0.0
 python-dotenv==1.0.1
-
-# ── LangChain Google (LLM only) ───────────────────────────────
 langchain-google-genai==4.0.0
 langchain-core==1.4.8
 google-genai==1.53.0
-
-# ── Pinecone ──────────────────────────────────────────────────
 pinecone==6.0.0
-
-# ── Embeddings — CPU only, no torch, no CUDA ──────────────────
-# Forces sentence-transformers to use ONNX runtime instead of torch
-# Result: ~80MB RAM instead of 1.5GB
-onnxruntime==1.22.0
-optimum[onnxruntime]==1.26.2
+torch==2.5.1+cpu
 sentence-transformers==3.3.1
-
-# ── HTTP ──────────────────────────────────────────────────────
 requests==2.32.3
 httpx==0.28.1
-
-# ── Utils ─────────────────────────────────────────────────────
 PyYAML==6.0.2
 python-dateutil==2.9.0.post0
